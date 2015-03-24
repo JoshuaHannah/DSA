@@ -37,21 +37,6 @@ func New() *RBTree {
 }
 
 func (r *RBTree) Insert(k int, v int){
-	if r.root == nil {
-		z := &node{
-			parent: &sentinel, 
-			left: &sentinel,
-			right: &sentinel,
-			Key: k,
-			Value: v,
-		}
-		r.Root = z
-	} else {
-		r.insert(k, v)
-	}
-}
-
-func (r *RBTree) insert(k int, v int){
 	y := &sentinel
 	x := r.Root
 	for x != &sentinel {
@@ -92,19 +77,34 @@ func (r *RBTree) insert-fixup(z *node){
 				y.colour = BLACK
 				z.parent.parent.colour = RED
 				z = z.parent.parent
-			} else if z == z.parent.right {
-				z = z.parent
-				r.left_rotate(z)
 			} else {
+				if z == z.parent.right {
+					z = z.parent
+					r.left_rotate(z)
+				}
 				z.parent.colour = BLACK
 				z.parent.parent.colour = RED
 				r.right_rotate(z.parent.parent)
 			}
 		} else {
-			
+			y := z.parent.parent.left
+			if y.colour == RED {
+				z.parent.colour = BLACK
+				y.colour = BLACK
+				z.parent.parent.colour = RED
+				z = z.parent.parent
+			} else {
+				if z == z.parent.left {
+					z = z.parent
+					r.right_rotate(z)
+				}
+				z.parent.colour = BLACK
+				z.parent.parent.colour = RED
+				r.left_rotate(z.parent.parent)
+			}
 		}
 	}
-	r.root.colour = BLACK
+	r.Root.colour = BLACK
 }
 
 func (r *RBTree) Delete(key int){
@@ -122,4 +122,37 @@ func (r *RBTree) Clear(){
 
 func (r *RBTree) Empty() {
 	return r.Root == nil
+}
+
+func (r *RBTree) left-rotate(z *node){
+	y := z.right
+	z.right = y.left
+	if y.left != &sentinel{
+		y.left.parent = z
+	}
+	y.parent = z.parent
+	if z.parent == &sentinel {
+		r.Root = y
+	} else if z == z.parent.left {
+		z.parent.left = y
+	} else {
+		z.parent.right = y
+	}
+	y.left = z
+	z.parent = y
+}
+
+func (r *RBTree) right-rotate(y *node){
+	z := y.left
+	y.left = z.right
+	z.right = y
+	z.parent = y.parent
+	if y.parent == &sentinel {
+		r.Root = z
+	} else y.parent.left == y {
+		y.parent.left = z
+	} else {
+		y.parent.right = z
+	}
+	y.parent = z
 }
